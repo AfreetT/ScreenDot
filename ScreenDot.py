@@ -1,7 +1,8 @@
 import sys
+import os
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPainter, QPen, QColor
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QCheckBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QCheckBox, QFileDialog
 
 class Overlay(QWidget):
     EnterSignal = pyqtSignal()
@@ -62,11 +63,14 @@ class Overlay(QWidget):
         self.setGeometry(0, 0, self.screen_width, self.screen_height )
         self.dot_position = ( int(self.pos_w * self.screen_width), int(self.pos_h * self.screen_height) )
 
-    def RecalculateGeometry(self, screen_width, screen_height):
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.pixel_pos_w = int(self.pos_w * self.screen_width) 
-        self.pixel_pos_h = int(self.pos_h * self.screen_height)
+    def RecalculateGeometry(self, screen_width = None, screen_height = None):
+        if(screen_width):
+            self.screen_width = screen_width
+        if(screen_height):
+            self.screen_height = screen_height
+
+        self.pixel_pos_w = int(self.pos_w * self.screen_width - 0.5 * self.dot_size) 
+        self.pixel_pos_h = int(self.pos_h * self.screen_height - 0.5 * self.dot_size)
         self.setGeometry(self.pixel_pos_w, self.pixel_pos_h, self.dot_size, self.dot_size )
         self.dot_position = (self.width() // 2, self.height() // 2)
 
@@ -131,6 +135,14 @@ class MainWindow(QWidget):
         self.move_dot_checkbox.clicked.connect(self.toggle_move_dot)
         layout.addWidget(self.move_dot_checkbox)
 
+        load_button = QPushButton('Load position', self)
+        load_button.clicked.connect(self.LoadPosition)
+        layout.addWidget(load_button)
+
+        save_button = QPushButton('Save position', self)
+        save_button.clicked.connect(self.SavePosition)
+        layout.addWidget(save_button)
+
         self.setLayout(layout)
 
         self.overlay.EnterSignal.connect(self.UpdateText)
@@ -154,6 +166,20 @@ class MainWindow(QWidget):
         self.overlay.close()
         event.accept()
 
+    def LoadPosition(self):
+        f_name = QFileDialog.getOpenFileName(self, 'Load position', 
+                            os.getcwd(),"TXT Files (*.txt)")[0]
+
+        if(f_name):
+            self.overlay.LoadPosition(f_name = f_name)
+            self.overlay.RecalculateGeometry()
+
+    def SavePosition(self):
+        f_name = QFileDialog.getSaveFileName(self, 'Load position', 
+                            os.getcwd(),"TXT Files (*.txt)")[0]
+
+        if(f_name):
+            self.overlay.SavePosition(f_name = f_name)
 
 
 if __name__ == "__main__":
