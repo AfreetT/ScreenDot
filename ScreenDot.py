@@ -87,13 +87,23 @@ class Overlay(QWidget):
             self.update()
 
     def keyPressEvent(self, qKeyEvent):
-        if (qKeyEvent.key() == Qt.Key_Return and self.move_dot_on_click): 
-            self.move_dot_on_click = False
+        if(not self.move_dot_on_click): 
+            return
 
+        if(qKeyEvent.key() == Qt.Key_Escape):
+            self.move_dot_on_click = False
+            self.LoadPosition()
+            self.RecalculateGeometry()
+            self.EnterSignal.emit()
+
+        if(qKeyEvent.key() == Qt.Key_Return): 
+            self.move_dot_on_click = False
             self.setGeometry(self.pixel_pos_w, self.pixel_pos_h, self.dot_size, self.dot_size )
             self.dot_position = (self.width() // 2, self.height() // 2)
             self.SavePosition()
             self.EnterSignal.emit()
+
+        
 
     def SavePosition(self, f_name = None):
         if(not f_name):
