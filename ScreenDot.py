@@ -189,6 +189,8 @@ class MainWindow(QWidget):
                             os.getcwd(),"TXT Files (*.txt)")[0]
 
         if(f_name):
+            if(f_name[:-4] != ".txt"):
+                f_name += ".txt"
             self.overlay.SavePosition(f_name = f_name)
 
 
